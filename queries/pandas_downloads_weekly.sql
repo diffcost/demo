@@ -6,5 +6,4 @@ SELECT
   COUNT(*) AS downloads
 FROM `bigquery-public-data.pypi.file_downloads`
 WHERE project = 'pandas'
-  AND DATE(timestamp) >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
 GROUP BY day, pandas_version, python_version
