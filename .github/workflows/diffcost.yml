@@ -1,0 +1,26 @@
+name: DiffCost
+on: pull_request   # every PR, no `paths:` filter
+
+permissions:
+  contents: read        # git diff against the base branch
+  pull-requests: write  # post and update the PR comment
+  id-token: write       # Workload Identity Federation
+
+jobs:
+  diffcost:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # required: a shallow clone has no base history
+
+      # Keyless (Workload Identity Federation, direct access: no service account)
+      - uses: google-github-actions/auth@v3
+        if: github.event.pull_request.head.repo.full_name == github.repository  # fork PRs get no OIDC token
+        with:
+          workload_identity_provider: 'projects/914802718761/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+
+      - uses: diffcost/action@v1
+        with:
+          sql_paths: "queries/**/*.sql"
+          gcp_project: "diffcost-sandbox"
